@@ -12,5 +12,4 @@ public class UserSummary {
     private String lastName;
     private String email;
     private RolesType role;
-    private LocalDate createdAt;
 }

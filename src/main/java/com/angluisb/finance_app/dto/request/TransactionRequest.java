@@ -11,16 +11,19 @@ import java.time.LocalDate;
 @Data
 public class TransactionRequest {
 
-    @NotNull
+    @NotNull(message = "category is required")
     private CategoryType category;
 
-    @NotNull
+    @NotNull(message = "Amount is required")
     private Double amount;
 
-    @NotNull
+    @NotNull(message = "Transaction type is required")
     private TransactionType type;
 
-    @NotNull
+    @NotNull(message = "date is required")
     private LocalDate date;
+
+    @NotNull(message = "wallet ID is required")
+    private Long walletId;
 
 }

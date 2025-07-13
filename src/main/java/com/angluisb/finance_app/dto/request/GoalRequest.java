@@ -9,19 +9,24 @@ import java.time.LocalDate;
 
 @Data
 public class GoalRequest {
-    @NotNull
+
+    @NotNull(message = "Name is required")
     @Size(min = 1, max = 50)
     private String name;
 
-    @NotNull
+    @NotNull(message = "Amount is required")
     @Positive
     private Double amount;
 
-    @NotNull
+    @NotNull(message = "DeadLine is required")
     private LocalDate deadline;
 
-    @NotNull
+    @NotNull(message = "Description is required")
     @Size(min = 1, max = 100)
     private String description;
+
+    @NotNull(message = "wallet ID is required")
+    private Long walletId;
+
 
 }

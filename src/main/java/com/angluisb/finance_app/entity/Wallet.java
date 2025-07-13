@@ -1,6 +1,8 @@
 package com.angluisb.finance_app.entity;
 
+import com.angluisb.finance_app.entity.Enum.CurrencyType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -32,6 +34,10 @@ public class Wallet {
     @PositiveOrZero
     @Column(nullable = false)
     private Double balance;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency;
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL,  orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
