@@ -27,6 +27,5 @@ public class UserRequest {
     @Size(min = 8, max = 225)
     private String password;
 
-    @NotNull(message = "Role is required")
-    private RolesType role;
+
 }
