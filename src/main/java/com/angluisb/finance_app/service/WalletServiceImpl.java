@@ -4,11 +4,12 @@ import com.angluisb.finance_app.dto.request.WalletRequest;
 import com.angluisb.finance_app.dto.response.WalletResponse;
 import com.angluisb.finance_app.entity.User;
 import com.angluisb.finance_app.entity.Wallet;
-import com.angluisb.finance_app.mapper.UserMapper;
 import com.angluisb.finance_app.mapper.WalletMapper;
 import com.angluisb.finance_app.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,15 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public WalletResponse getById(Long id) {
-        return null;
+    public Wallet getById(Long id) {
+        Optional<Wallet> optionalWallet = walletRepository.findById(id);
+
+        if (optionalWallet.isEmpty()) {
+            return null;
+        }
+
+        return optionalWallet.get();
+
     }
 
     @Override
