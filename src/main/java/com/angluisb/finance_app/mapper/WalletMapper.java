@@ -2,6 +2,8 @@ package com.angluisb.finance_app.mapper;
 
 import com.angluisb.finance_app.dto.request.WalletRequest;
 import com.angluisb.finance_app.dto.response.WalletResponse;
+import com.angluisb.finance_app.dto.summary.UserSummary;
+import com.angluisb.finance_app.dto.summary.WalletSummary;
 import com.angluisb.finance_app.entity.User;
 import com.angluisb.finance_app.entity.Wallet;
 import org.mapstruct.Mapper;
@@ -10,6 +12,8 @@ import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface WalletMapper {
+
+
     WalletResponse toWalletResponse(Wallet wallet);
 
     @Mapping(target = "id", ignore = true)
@@ -26,4 +30,9 @@ public interface WalletMapper {
         user.setId(userId);
         return user;
     }
+
+
+
+    WalletSummary toWalletSummary(Wallet wallet);
 }
+

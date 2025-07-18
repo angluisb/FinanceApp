@@ -2,6 +2,7 @@ package com.angluisb.finance_app.mapper;
 
 import com.angluisb.finance_app.dto.request.UserRequest;
 import com.angluisb.finance_app.dto.response.UserResponse;
+import com.angluisb.finance_app.dto.summary.UserSummary;
 import com.angluisb.finance_app.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,5 +17,9 @@ public interface UserMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     User toEntity(UserRequest userRequest);
+
+
+
+    UserSummary toUserSummary(User user);
 
 }
