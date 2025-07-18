@@ -31,8 +31,6 @@ public interface WalletMapper {
         return user;
     }
 
-
-
     WalletSummary toWalletSummary(Wallet wallet);
 }
 

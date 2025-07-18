@@ -2,6 +2,7 @@ package com.angluisb.finance_app.mapper;
 
 import com.angluisb.finance_app.dto.request.TransactionRequest;
 import com.angluisb.finance_app.dto.response.TransactionResponse;
+import com.angluisb.finance_app.dto.summary.TransactionSummary;
 import com.angluisb.finance_app.entity.Transaction;
 import com.angluisb.finance_app.entity.Wallet;
 import org.mapstruct.Mapper;
@@ -26,4 +27,6 @@ public interface TransactionMapper {
         wallet.setId(walletId);
         return wallet;
     }
+
+    TransactionSummary toTransactionSummary(Transaction transaction);
 }
