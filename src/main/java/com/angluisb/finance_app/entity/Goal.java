@@ -38,6 +38,9 @@ public class Goal {
     @Size(min = 1, max = 100)
     private String description;
 
+    @Column(nullable = false)
+    private Boolean status;
+
     @ManyToOne()
     @JoinColumn(name = "wallet_id")
     private Wallet wallet;
@@ -48,5 +51,6 @@ public class Goal {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDate.now();
+        this.status = Boolean.TRUE;
     }
 }

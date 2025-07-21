@@ -20,4 +20,5 @@ public class GoalResponse {
     private LocalDate createdAt;
     private WalletSummary wallet;
     private String description;
+    private Boolean status;
 }

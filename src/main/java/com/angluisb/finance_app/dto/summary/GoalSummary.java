@@ -11,4 +11,5 @@ public class GoalSummary {
     private double amount;
     private LocalDate deadline;
     private String description;
+    private Boolean status;
 }

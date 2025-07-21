@@ -13,6 +13,7 @@ public interface GoalMapper {
     GoalResponse toGoalResponse(Goal goal);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "wallet", source = "walletId", qualifiedByName = "mapWalletIdToWallet")
     Goal toGoal(GoalRequest goalRequest);
