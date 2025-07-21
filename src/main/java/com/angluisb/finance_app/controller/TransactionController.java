@@ -20,7 +20,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
 
-    @PostMapping("create")
+    @PostMapping("new")
     public ResponseEntity<TransactionResponse> create(@RequestBody @Valid TransactionRequest transactionRequest) {
         TransactionResponse transaction =  transactionService.create(transactionRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(transaction);
