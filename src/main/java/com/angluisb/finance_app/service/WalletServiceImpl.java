@@ -24,7 +24,9 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public WalletResponse createWallet(WalletRequest walletRequest) {
         Wallet wallet = walletMapper.toEntity(walletRequest);
+        // user only with id
         Wallet savedWallet = walletRepository.save(wallet);
+
 
         User fullUser = userService.getById(walletRequest.getUserId());
         savedWallet.setUser(fullUser);
