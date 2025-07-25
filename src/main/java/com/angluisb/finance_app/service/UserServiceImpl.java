@@ -5,6 +5,7 @@ import com.angluisb.finance_app.dto.response.UserResponse;
 import com.angluisb.finance_app.entity.Enum.RolesType;
 import com.angluisb.finance_app.entity.User;
 import com.angluisb.finance_app.exception.BusinessException;
+import com.angluisb.finance_app.exception.ResourceNotFoundException;
 import com.angluisb.finance_app.exception.ValidationException;
 import com.angluisb.finance_app.mapper.UserMapper;
 import com.angluisb.finance_app.repository.UserRepository;
@@ -48,17 +49,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id is null");
+        }
         Optional<User> userOptional = userRepository.findById(id);
 
         if (userOptional.isEmpty()) {
-            return null;
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
         return userOptional.get();
     }
 
     @Override
     public void delete(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("User id must not be null");
+        }
 
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        }
+
+        else {
+            throw new ResourceNotFoundException("User not found with id: " + id);
+        }
     }
 
     @Override
