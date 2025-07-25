@@ -24,6 +24,5 @@ public class WalletRequest {
     private Long userId;
 
     @NotNull(message = "Currency is required")
-    @NotBlank(message = "Currency cannot be blank")
-    private CurrencyType currency;
+     private CurrencyType currency;
 }
