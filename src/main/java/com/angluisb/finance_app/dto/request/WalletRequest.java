@@ -1,6 +1,7 @@
 package com.angluisb.finance_app.dto.request;
 
 import com.angluisb.finance_app.entity.Enum.CurrencyType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 public class WalletRequest {
 
     @NotNull(message = "Name is required")
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 50, message = "name size must be between 3 and 50")
     private String name;
 
     @PositiveOrZero
@@ -23,5 +24,6 @@ public class WalletRequest {
     private Long userId;
 
     @NotNull(message = "Currency is required")
+    @NotBlank(message = "Currency cannot be blank")
     private CurrencyType currency;
 }
