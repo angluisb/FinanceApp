@@ -4,6 +4,8 @@ import com.angluisb.finance_app.dto.request.UserRequest;
 import com.angluisb.finance_app.dto.response.UserResponse;
 import com.angluisb.finance_app.entity.Enum.RolesType;
 import com.angluisb.finance_app.entity.User;
+import com.angluisb.finance_app.exception.BusinessException;
+import com.angluisb.finance_app.exception.ValidationException;
 import com.angluisb.finance_app.mapper.UserMapper;
 import com.angluisb.finance_app.repository.UserRepository;
 import jdk.jshell.spi.ExecutionControl;
@@ -26,13 +28,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse createUser(UserRequest request) throws BadRequestException {
         if (request == null) {
-            throw new BadRequestException("UserRequest is null");
+            throw new ValidationException("UserRequest cannot be null");
         }
 
         String normalizedEmail = request.getEmail().trim().toLowerCase();
 
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new IllegalArgumentException("Email is already in use");
+            throw new BusinessException("Email is already in use");
         }
 
         User user = userMapper.toEntity(request);
