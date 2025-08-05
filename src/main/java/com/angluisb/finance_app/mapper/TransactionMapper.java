@@ -9,6 +9,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {
     TransactionResponse toTransactionResponse(Transaction transaction);
@@ -17,6 +19,8 @@ public interface TransactionMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "wallet", source = "walletId", qualifiedByName = "mapWalletIdToWallet")
     Transaction toTransaction(TransactionRequest transactionRequest);
+
+    List<TransactionResponse> toTransactionResponse(List<Transaction> transactions);
 
     @Named("mapWalletIdToWallet")
     static Wallet mapWalletIdToWallet(Long walletId) {

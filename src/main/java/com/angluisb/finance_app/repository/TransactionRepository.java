@@ -18,4 +18,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findAllByWalletAndDateBetween(Wallet wallet, LocalDate dateStart, LocalDate dateEnd);
 
+    boolean existsByWallet_Id(Long walletId);
+
+    List<Transaction> findAllByWalletId(Long walletId);
+
 }
