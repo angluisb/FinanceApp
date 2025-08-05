@@ -33,4 +33,10 @@ public class UserController {
         userService.updatePassword(request,id);
         return ResponseEntity.ok("Password Updated");
     }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) throws BadRequestException {
+        userService.delete(id);
+        return ResponseEntity.ok("Deleted");
+    }
 }
