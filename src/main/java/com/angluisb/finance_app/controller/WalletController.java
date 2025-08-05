@@ -35,6 +35,12 @@ public class WalletController {
     @GetMapping("get/{id}")
     public ResponseEntity<List<WalletResponse>> getWallets(@PathVariable Long id){
         List<WalletResponse> walletResponseList = walletService.findAllWalletsByUser(id);
-        return ResponseEntity.status(HttpStatus.FOUND).body(walletResponseList);
+        return ResponseEntity.ok(walletResponseList);
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<String> deleteWallet(@PathVariable Long id){
+        walletService.deleteWallet(id);
+        return ResponseEntity.ok("Wallet deleted");
     }
 }

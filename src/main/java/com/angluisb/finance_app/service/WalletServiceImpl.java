@@ -28,12 +28,11 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public WalletResponse createWallet(WalletRequest walletRequest) {
         Wallet wallet = walletMapper.toEntity(walletRequest);
-        // user only with id
-        Wallet savedWallet = walletRepository.save(wallet);
-
 
         User fullUser = userService.getById(walletRequest.getUserId());
-        savedWallet.setUser(fullUser);
+        wallet.setUser(fullUser);
+
+        Wallet savedWallet = walletRepository.save(wallet);
 
         return walletMapper.toWalletResponse(savedWallet);
     }
@@ -84,6 +83,14 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public void deleteWallet(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("wallet id must not be null");
+        }
 
+        if (walletRepository.findById(id).isEmpty()) {
+            throw new ResourceNotFoundException("Not found Wallet with id: "+ id);
+        }
+
+        walletRepository.deleteById(id);
     }
 }
