@@ -10,11 +10,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface WalletMapper {
 
 
     WalletResponse toWalletResponse(Wallet wallet);
+
+    List<WalletResponse> toWalletResponse(List<Wallet> walletList);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
