@@ -6,11 +6,13 @@ import com.angluisb.finance_app.dto.update.TransactionUpdate;
 import com.angluisb.finance_app.entity.Enum.TransactionType;
 import com.angluisb.finance_app.entity.Transaction;
 import com.angluisb.finance_app.entity.Wallet;
+import com.angluisb.finance_app.exception.BusinessException;
 import com.angluisb.finance_app.exception.ResourceNotFoundException;
 import com.angluisb.finance_app.mapper.TransactionMapper;
 import com.angluisb.finance_app.repository.TransactionRepository;
 import com.angluisb.finance_app.repository.UserRepository;
 import com.angluisb.finance_app.repository.WalletRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,9 +32,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
+    @Transactional
     public TransactionResponse create(TransactionRequest transactionRequest) {
         Transaction transaction = transactionMapper.toTransaction(transactionRequest);
-        Transaction savedTransaction = transactionRepository.save(transaction);
 
         Wallet fullWallet = walletService.getById(transactionRequest.getWalletId());
 
@@ -40,13 +42,15 @@ public class TransactionServiceImpl implements TransactionService {
             throw new ResourceNotFoundException("Wallet not found with id: " +  transactionRequest.getWalletId());
         }
 
-        savedTransaction.setWallet(fullWallet);
-        updateBalance(transactionRequest);
+        transaction.setWallet(fullWallet);
+        Transaction savedTransaction =  transactionRepository.save(transaction);
+        updateBalance(fullWallet,savedTransaction.getType(),savedTransaction.getAmount());
 
         return transactionMapper.toTransactionResponse(savedTransaction);
     }
 
     @Override
+    @Transactional
     public TransactionResponse update(TransactionUpdate transaction, Long id) {
         if (id == null) {
             throw new IllegalArgumentException("Transaction id cannot be null");
@@ -69,6 +73,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if (id == null){
             throw new IllegalArgumentException("Transaction id cannot be null");
@@ -77,6 +82,9 @@ public class TransactionServiceImpl implements TransactionService {
         if (!transactionRepository.existsById(id)){
             throw new ResourceNotFoundException("Transaction not found with id: " + id);
         }
+        Transaction transaction = getById(id);
+        Wallet wallet =  transaction.getWallet();
+        reverseBalance(wallet, transaction.getType(), transaction.getAmount());
 
         transactionRepository.deleteById(id);
     }
@@ -112,18 +120,25 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    public void updateBalance(TransactionRequest transactionRequest) {
-
-        Wallet fullWallet = walletService.getById(transactionRequest.getWalletId());
-        TransactionType type = transactionRequest.getType();
-        Double amount = transactionRequest.getAmount();
+    public void updateBalance(Wallet fullWallet, TransactionType type, Double amount) {
 
         if (type.equals(TransactionType.EXPENSE)){
+            if (fullWallet.getBalance() < amount){
+                throw new BusinessException("Insufficient funds");
+            }
             fullWallet.setBalance(fullWallet.getBalance() - amount);
         }
-        if (type.equals(TransactionType.INCOME)){
+        else if (type.equals(TransactionType.INCOME)){
             fullWallet.setBalance(fullWallet.getBalance() + amount);
         }
         walletRepository.save(fullWallet);
+    }
+
+    public void reverseBalance (Wallet wallet, TransactionType type, Double amount) {
+        if (type.equals(TransactionType.EXPENSE)) {
+            wallet.setBalance(wallet.getBalance() + amount);
+        } else if (type.equals(TransactionType.INCOME)) {
+            wallet.setBalance(wallet.getBalance() - amount);
+        }
     }
 }

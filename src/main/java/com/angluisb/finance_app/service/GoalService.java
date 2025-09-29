@@ -10,9 +10,9 @@ public interface GoalService {
     public GoalResponse create(GoalRequest goal);
     public GoalResponse update(GoalRequest goal);
     public void delete(Long id);
-    public GoalResponse findById(Long id);
+    public Goal findById(Long id);
     List<GoalResponse> findByWalletId(Long id);
-    List<GoalResponse> findByStatus(Boolean status);
+    List<GoalResponse> findByStatus(Boolean status, Long walletId);
 
 
 }

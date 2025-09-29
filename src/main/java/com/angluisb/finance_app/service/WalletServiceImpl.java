@@ -21,7 +21,7 @@ public class WalletServiceImpl implements WalletService {
 
     private final WalletMapper walletMapper;
     private final WalletRepository walletRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
 
 
@@ -52,9 +52,8 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public Wallet getById(Long id) {
-        Optional<Wallet> optionalWallet = walletRepository.findById(id);
-
-        return optionalWallet.orElse(null);
+        return walletRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found with id:" +id));
     }
 
     @Override
@@ -66,7 +65,7 @@ public class WalletServiceImpl implements WalletService {
         Optional<Wallet> optionalWallet = walletRepository.findById(id);
 
         if (optionalWallet.isEmpty()){
-            throw new ResourceNotFoundException("Wallet not found whit id: "+ id);
+            throw new ResourceNotFoundException("Wallet not found with id: "+ id);
         }
 
         Wallet walletToUpdate = optionalWallet.get();

@@ -4,6 +4,7 @@ import com.angluisb.finance_app.dto.request.GoalRequest;
 import com.angluisb.finance_app.dto.response.GoalResponse;
 import com.angluisb.finance_app.entity.Goal;
 import com.angluisb.finance_app.entity.Wallet;
+import com.angluisb.finance_app.exception.ResourceNotFoundException;
 import com.angluisb.finance_app.mapper.GoalMapper;
 import com.angluisb.finance_app.repository.GoalRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +25,13 @@ public class GoalServiceImpl implements GoalService{
     @Override
     public GoalResponse create(GoalRequest requestGoal) {
         Goal newGoal = goalMapper.toGoal(requestGoal);
-        newGoal = goalRepository.save(newGoal);
 
         Wallet fullWallet = walletService.getById(requestGoal.getWalletId());
         newGoal.setWallet(fullWallet);
+        Goal savedGoal = goalRepository.save(newGoal);
 
-        return goalMapper.toGoalResponse(newGoal);
+
+        return goalMapper.toGoalResponse(savedGoal);
     }
 
     @Override
@@ -43,17 +45,25 @@ public class GoalServiceImpl implements GoalService{
     }
 
     @Override
-    public GoalResponse findById(Long id) {
-        return null;
+    public Goal findById(Long id) {
+        return goalRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Goal not found with id: " +id));
     }
 
     @Override
     public List<GoalResponse> findByWalletId(Long id) {
-        return List.of();
+        Wallet wallet = walletService.getById(id);
+        
+        List<Goal> goals = goalRepository.findAllByWallet(wallet);
+
+        return goalMapper.toGoalResponse(goals);
     }
 
     @Override
-    public List<GoalResponse> findByStatus(Boolean status) {
-        return List.of();
+    public List<GoalResponse> findByStatus(Boolean status, Long walletId) {
+        Wallet wallet = walletService.getById(walletId);
+
+        List<Goal> goalsByStatus = goalRepository.findAllByWalletAndStatus(wallet, status);
+        return goalMapper.toGoalResponse(goalsByStatus);
     }
 }
