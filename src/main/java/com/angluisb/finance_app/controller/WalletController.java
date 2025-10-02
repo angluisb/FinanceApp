@@ -21,24 +21,24 @@ public class WalletController {
     private final WalletService walletService;
     private final UserService userService;
 
-    @PostMapping("create")
+    @PostMapping
     public ResponseEntity<WalletResponse> createWallet(@RequestBody @Valid WalletRequest walletRequest) {
         WalletResponse savedWallet = walletService.createWallet(walletRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedWallet);
     }
 
-    @PutMapping("update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<WalletResponse> updateWallet(@RequestBody @Valid WalletUpdate walletRequest, @PathVariable Long id) {
         return ResponseEntity.ok(walletService.updateWallet(walletRequest,id));
     }
 
-    @GetMapping("get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<List<WalletResponse>> getWallets(@PathVariable Long id){
         List<WalletResponse> walletResponseList = walletService.findAllWalletsByUser(id);
         return ResponseEntity.ok(walletResponseList);
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteWallet(@PathVariable Long id){
         walletService.deleteWallet(id);
         return ResponseEntity.ok("Wallet deleted");
