@@ -17,6 +17,7 @@ public class TransactionRequest {
     private CategoryType category;
 
     @NotNull(message = "Amount is required")
+
     private Double amount;
 
     @NotNull(message = "Transaction type is required")

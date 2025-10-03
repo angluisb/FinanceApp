@@ -10,23 +10,22 @@ import com.angluisb.finance_app.exception.BusinessException;
 import com.angluisb.finance_app.exception.ResourceNotFoundException;
 import com.angluisb.finance_app.mapper.TransactionMapper;
 import com.angluisb.finance_app.repository.TransactionRepository;
-import com.angluisb.finance_app.repository.UserRepository;
 import com.angluisb.finance_app.repository.WalletRepository;
-import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-    private final WalletServiceImpl walletService;
+    private final WalletService walletService;
     private final WalletRepository walletRepository;
 
 
@@ -34,111 +33,95 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public TransactionResponse create(TransactionRequest transactionRequest) {
-        Transaction transaction = transactionMapper.toTransaction(transactionRequest);
-
-        Wallet fullWallet = walletService.getById(transactionRequest.getWalletId());
-
-        if (fullWallet == null) {
-            throw new ResourceNotFoundException("Wallet not found with id: " +  transactionRequest.getWalletId());
+        if (transactionRequest.getAmount() <= 0) {
+            throw new BusinessException("Amount must be greater than 0");
         }
 
+        Wallet fullWallet = walletService.getById(transactionRequest.getWalletId());
+        updateBalance(fullWallet,transactionRequest.getType(),transactionRequest.getAmount());
+
+        Transaction transaction = transactionMapper.toTransaction(transactionRequest);
         transaction.setWallet(fullWallet);
         Transaction savedTransaction =  transactionRepository.save(transaction);
-        updateBalance(fullWallet,savedTransaction.getType(),savedTransaction.getAmount());
 
         return transactionMapper.toTransactionResponse(savedTransaction);
     }
 
     @Override
     @Transactional
-    public TransactionResponse update(TransactionUpdate transaction, Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Transaction id cannot be null");
-        }
+    public TransactionResponse update(TransactionUpdate transactionUpdate, Long id) {
+        Transaction existingTransaction = getById(id);
+        Wallet wallet = existingTransaction.getWallet();
 
-        Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
+        reverseBalance(wallet,existingTransaction.getType(),existingTransaction.getAmount());
 
-        if (optionalTransaction.isEmpty()) {
-            throw new ResourceNotFoundException("Transaction not found with id: " + id);
-        }
+        Optional.ofNullable(transactionUpdate.getAmount()).ifPresent(existingTransaction::setAmount);
+        Optional.ofNullable(transactionUpdate.getType()).ifPresent(existingTransaction::setType);
+        Optional.ofNullable(transactionUpdate.getDate()).ifPresent(existingTransaction::setDate);
+        Optional.ofNullable(transactionUpdate.getCategory()).ifPresent(existingTransaction::setCategory);
 
-        Transaction transactionToUpdate = optionalTransaction.get();
+        updateBalance(wallet, existingTransaction.getType(),existingTransaction.getAmount());
 
-        transactionToUpdate.setAmount(transaction.getAmount());
-        transactionToUpdate.setType(transaction.getType());
-        transactionToUpdate.setDate(transaction.getDate());
-        transactionToUpdate.setCategory(transaction.getCategory());
 
-        return transactionMapper.toTransactionResponse(transactionRepository.save(transactionToUpdate));
+        return transactionMapper.toTransactionResponse(transactionRepository.save(existingTransaction));
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (id == null){
-            throw new IllegalArgumentException("Transaction id cannot be null");
-        }
-
-        if (!transactionRepository.existsById(id)){
-            throw new ResourceNotFoundException("Transaction not found with id: " + id);
-        }
         Transaction transaction = getById(id);
         Wallet wallet =  transaction.getWallet();
-        reverseBalance(wallet, transaction.getType(), transaction.getAmount());
 
-        transactionRepository.deleteById(id);
+        reverseBalance(wallet, transaction.getType(), transaction.getAmount());
+        transactionRepository.delete(transaction);
     }
 
     @Override
     public Transaction getById(Long id) {
-        if (id == null){
-            throw new IllegalArgumentException("Transaction id cannot be null");
-        }
-
-        Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
-
-        if (optionalTransaction.isEmpty()) {
-            throw new ResourceNotFoundException("Transaction not found with id: " + id);
-        }
-
-        return optionalTransaction.get();
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + id));
     }
 
     @Override
     public List<TransactionResponse> findByWalletId(Long id) {
-        if (id == null){
-            throw new IllegalArgumentException("Wallet id cannot be null");
-        }
+        walletService.getById(id);
 
         List<Transaction> transactions = transactionRepository.findAllByWalletId(id);
-
-        if (transactions.isEmpty()) {
-            throw new ResourceNotFoundException("Transactions not found with Wallet id: " + id);
-        }
-
         return transactionMapper.toTransactionResponse(transactions);
     }
 
 
-    public void updateBalance(Wallet fullWallet, TransactionType type, Double amount) {
-
-        if (type.equals(TransactionType.EXPENSE)){
-            if (fullWallet.getBalance() < amount){
-                throw new BusinessException("Insufficient funds");
-            }
-            fullWallet.setBalance(fullWallet.getBalance() - amount);
+    private void updateBalance(Wallet wallet, TransactionType type, Double amount) {
+        switch (type) {
+            case EXPENSE:
+                if (wallet.getBalance() < amount) {
+                    throw new BusinessException("Insufficient funds");
+                }
+                wallet.setBalance(wallet.getBalance() - amount);
+                break;
+            case INCOME:
+                wallet.setBalance(wallet.getBalance() + amount);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid transaction type: " + type);
         }
-        else if (type.equals(TransactionType.INCOME)){
-            fullWallet.setBalance(fullWallet.getBalance() + amount);
-        }
-        walletRepository.save(fullWallet);
+        walletRepository.save(wallet);
     }
 
-    public void reverseBalance (Wallet wallet, TransactionType type, Double amount) {
-        if (type.equals(TransactionType.EXPENSE)) {
-            wallet.setBalance(wallet.getBalance() + amount);
-        } else if (type.equals(TransactionType.INCOME)) {
-            wallet.setBalance(wallet.getBalance() - amount);
+    private void reverseBalance (Wallet wallet, TransactionType type, Double amount) {
+        switch (type){
+            case EXPENSE:
+                wallet.setBalance(wallet.getBalance() + amount);
+                break;
+            case INCOME:
+                if (wallet.getBalance() < amount) {
+                    throw new BusinessException("Cannot reverse: would result in negative balance");
+                }
+                wallet.setBalance(wallet.getBalance() - amount);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid transaction type: " + type);
         }
+        walletRepository.save(wallet);
     }
 }

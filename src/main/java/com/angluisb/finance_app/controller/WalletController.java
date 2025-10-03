@@ -15,11 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/wallets")
+@RequestMapping("a/pi/wallets")
 @RequiredArgsConstructor
 public class WalletController {
     private final WalletService walletService;
-    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<WalletResponse> createWallet(@RequestBody @Valid WalletRequest walletRequest) {
