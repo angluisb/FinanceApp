@@ -23,7 +23,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
+    public final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
     private final WalletService walletService;
     private final WalletRepository walletRepository;

@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface GoalService {
     public GoalResponse create(GoalRequest goal);
-    public GoalResponse update(GoalRequest goal);
+    public GoalResponse update(GoalRequest goal, Long id);
     public void delete(Long id);
-    public Goal findById(Long id);
+    public Goal getById(Long id);
     List<GoalResponse> findByWalletId(Long id);
     List<GoalResponse> findByStatus(Boolean status, Long walletId);
 
